@@ -9,8 +9,15 @@ TASKS_FILE = "tasks.json"
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
         return []
-    with open(TASKS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(TASKS_FILE, "r", encoding="utf-8") as f:
+            content = f.read()
+        if not content.strip():
+            return []
+        return json.loads(content)
+    except json.JSONDecodeError:
+        print("警告: tasks.json 格式损坏，已重置为空列表。")
+        return []
 
 
 def save_tasks(tasks):
@@ -25,6 +32,9 @@ def get_next_id(tasks):
 
 
 def add_task(title):
+    if not title or not title.strip():
+        print("错误: 任务标题不能为空。")
+        return
     tasks = load_tasks()
     task = {
         "id": get_next_id(tasks),
